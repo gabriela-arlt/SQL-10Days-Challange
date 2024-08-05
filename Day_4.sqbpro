@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/gabb_/OneDrive/Desktop/SQLite Challange/Day_4.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure pragmas query browser" current="2"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="1174"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,13:mainMovieTheaters"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Boxes" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="53"/><column index="2" value="87"/><column index="3" value="57"/><column index="4" value="106"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Departments" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="53"/><column index="2" value="277"/><column index="3" value="72"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Employees" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="113"/><column index="2" value="212"/><column index="3" value="145"/><column index="4" value="112"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Manufacturers" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="53"/><column index="2" value="129"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="MovieTheaters" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="53"/><column index="2" value="96"/><column index="3" value="61"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Movies" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort><column index="1" mode="0"/></sort><column_widths><column index="1" value="53"/><column index="2" value="181"/><column index="3" value="66"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Products" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="53"/><column index="2" value="121"/><column index="3" value="52"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Warehouses" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort><column index="2" mode="0"/></sort><column_widths><column index="1" value="53"/><column index="2" value="232"/><column index="3" value="83"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">CREATE TABLE IF NOT EXISTS Movies (
+  Code INTEGER,
+  Title VARCHAR(255) NOT NULL,
+  Rating VARCHAR(255),
+  PRIMARY KEY (Code)
+);
+
+CREATE TABLE IF NOT EXISTS MovieTheaters (
+  Code INTEGER,
+  Name VARCHAR(255) NOT NULL,
+  Movie INTEGER,
+  PRIMARY KEY (Code)
+  );
+
+INSERT INTO Movies(Code,Title,Rating) VALUES(1,'Citizen Kane','PG');
+INSERT INTO Movies(Code,Title,Rating) VALUES(2,'Singin'' in the Rain','G');
+INSERT INTO Movies(Code,Title,Rating) VALUES(3,'The Wizard of Oz','G');
+INSERT INTO Movies(Code,Title,Rating) VALUES(4,'The Quiet Man',NULL);
+INSERT INTO Movies(Code,Title,Rating) VALUES(5,'North by Northwest',NULL);
+INSERT INTO Movies(Code,Title,Rating) VALUES(6,'The Last Tango in Paris','NC-17');
+INSERT INTO Movies(Code,Title,Rating) VALUES(7,'Some Like it Hot','PG-13');
+INSERT INTO Movies(Code,Title,Rating) VALUES(8,'A Night at the Opera',NULL);
+ 
+INSERT INTO MovieTheaters(Code,Name,Movie) VALUES(1,'Odeon',5);
+INSERT INTO MovieTheaters(Code,Name,Movie) VALUES(2,'Imperial',1);
+INSERT INTO MovieTheaters(Code,Name,Movie) VALUES(3,'Majestic',NULL);
+INSERT INTO MovieTheaters(Code,Name,Movie) VALUES(4,'Royale',6);
+INSERT INTO MovieTheaters(Code,Name,Movie) VALUES(5,'Paraiso',3);
+INSERT INTO MovieTheaters(Code,Name,Movie) VALUES(6,'Nickelodeon',NULL);
+
+
+-- 4.1 Select the title of all movies.
+
+SELECT Title
+FROM Movies;
+
+-- 4.2 Show all the distinct ratings in the database.
+
+SELECT DISTINCT Rating
+FROM Movies;
+
+
+-- 4.3 Show all unrated movies.
+
+SELECT *
+FROM Movies
+WHERE Rating is NULL;
+
+
+-- 4.4 Select all movie theaters that are not currently showing a movie.
+
+SELECT Name
+FROM MovieTheaters
+WHERE Movie is null;
+
+
+-- 4.5 Select all data from all movie theaters and, additionally, the data from the movie that is being shown in the theater (if one is being shown).
+
+SELECT *
+FROM MovieTheaters AS MT LEFT JOIN Movies AS M
+ON M.Code=MT.Movie
+WHERE MT.Movie is not null;
+
+
+-- 4.6 Select all data from all movies and, if that movie is being shown in a theater, show the data from the theater.
+
+SELECT *
+FROM Movies AS M LEFT JOIN MovieTheaters AS MT 
+ON M.Code=MT.Movie
+WHERE MT.Name is not null;
+
+-- 4.7 Show the titles of movies not currently being shown in any theaters.
+
+SELECT M.Title, MT.Name
+FROM Movies AS M LEFT JOIN MovieTheaters AS MT 
+ON M.Code=MT.Movie
+WHERE MT.Name is NULL;
+
+
+-- 4.8 Add the unrated movie &quot;One, Two, Three&quot;.
+
+
+INSERT INTO Movies(Code,Title,Rating) VALUES(NULL,'One, Two, Three',NULL);
+
+
+-- 4.9 Set the rating of all unrated movies to &quot;G&quot;.
+
+UPDATE Movies
+SET Rating = 'G'
+WHERE Rating IS NULL;
+
+-- 4.10 Remove movie theaters projecting movies rated &quot;NC-17&quot;.
+
+--finding the MT
+SELECT MT.Name FROM MovieTheaters AS MT LEFT JOIN Movies AS M
+ON M.Code=MT.Movie
+WHERE M.Rating='NC-17';
+
+DELETE FROM MovieTheaters
+WHERE Name IN (SELECT MT.Name FROM MovieTheaters AS MT LEFT JOIN Movies AS M
+ON M.Code=MT.Movie
+WHERE M.Rating='NC-17');
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

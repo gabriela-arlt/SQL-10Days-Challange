@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/gabb_/Downloads/Task 9.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure pragmas query browser" current="2"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="125"/><column_width id="3" width="1476"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,9:maincran_logs"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="cran_logs" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="144"/><column index="2" value="73"/><column index="3" value="79"/><column index="4" value="91"/><column index="5" value="65"/><column index="6" value="103"/><column index="7" value="179"/><column index="8" value="117"/><column index="9" value="76"/><column index="10" value="53"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">
+UPDATE cran_logs_2015_01_01
+SET download_date = LTRIM(download_date, '&quot;')
+WHERE download_date LIKE '&quot;%';
+
+UPDATE cran_logs_2015_01_01
+SET ip_id = RTRIM(ip_id, '&quot;')
+WHERE ip_id LIKE '%&quot;';
+
+
+-- 9.1 Give the package name and how many times they're downloaded. Order by highest to lowest number of times downloaded.
+-- 9.2 Give the package ranking (based on how many times it was downloaded) during 9AM to 11AM
+
+WITH first AS (
+SELECT package, Count(*) AS Count_of_download
+FROM  cran_logs
+WHERE strftime('%H:%M:%S', time) BETWEEN '09:00:00' AND '11:00:00'
+GROUP BY package
+ORDER BY Count_of_download DESC)
+
+SELECT  package, Count_of_download,DENSE_RANK() OVER (ORDER BY Count_of_download) AS Rank
+FROM first;
+
+
+-- 9.3 How many records (downloads) are from China (&quot;CN&quot;) or Japan(&quot;JP&quot;) or Singapore (&quot;SG&quot;)?
+
+SELECT 
+(SELECT COUNT (*) FROM cran_logs WHERE country='CN') AS CN_count, 
+(SELECT COUNT (*) FROM cran_logs WHERE country='JP') AS JP_count, 
+(SELECT COUNT (*) FROM cran_logs WHERE country='SG') AS SG_count, 
+COUNT (*) AS Total_count_CN_JP_SG
+FROM cran_logs
+WHERE country='CN' OR
+country='JP' OR
+country='SG';
+
+
+
+-- 9.4 Print the countries whose downloads are more than the downloads from China (&quot;CN&quot;)
+
+SELECT country, count(*) AS count_of_downloads
+FROM cran_logs
+Group By country
+HAVing count_of_downloads &gt; (SELECT COUNt(*) FROM cran_logs WHERE country='CN')
+ORDER BY count_of_downloads DESC;
+
+
+--9.5 Print the length of each package name for packages which appear only once. 
+-- In the same query, show the average length of all such packages.
+
+WITH avg_length AS (
+ SELECT AVG (LENGTH(package)) as avg_length
+ FROM cran_logs
+ WHERE package IN(SELECT package FROM cran_logs GROUP BY package HAVING COUNT(*)=1))
+
+
+
+SELECT LENGTH(package) AS package_length,package, (SELECT avg_length FROM avg_length) AS avg_length
+FROM cran_logs
+WHERE package IN(SELECT package FROM cran_logs GROUP BY package HAVING COUNT(*)=1)
+ORDER BY package ASC
+
+
+
+-- 9.6 Get the package whose download count ranks 2nd (print package name and its download count).
+with one as(
+SELECT package, count(*) AS download_count
+FROM cran_logs
+GROUP BY package),
+
+
+two as (
+SELECT package, download_count, RANK() OVER(ORDER BY download_count DESC) as rank_order
+FROM one)
+
+select*
+from two
+where rank_order=2;
+
+
+
+-- 9.7 Print the name of the package whose download count is bigger than 1000.
+
+SELECT package, count(*) AS download_count
+FROM cran_logs
+GROUP BY package
+HAVING download_count&gt;1000
+
+
+-- 9.8 The field &quot;r_os&quot; is the operating system of the users.
+-- Here we would like to know what main system we have (ignore version number), the relevant counts, and the proportion (in percentage).
+--Hint: to write a query which can ignore the version number, try this: https://github.com/asg017/sqlite-regex)
+with one as (
+SELECT r_os,
+       CASE
+           WHEN r_os REGEXP 'darwin' THEN 'darwin'
+           WHEN r_os REGEXP 'linux' THEN 'linux'
+           WHEN r_os REGEXP 'mingw32' THEN 'mingw32'
+           ELSE 'Other'
+       END AS r_os_type
+FROM cran_logs_2015_01_01)
+
+SELECT 
+    r_os_type, 
+    COUNT(*) AS os_count,
+    CAST(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM one) AS INT) AS percentage
+FROM one
+GROUP BY r_os_type
+ORDER BY os_count;
+
+	</sql><current_tab id="0"/></tab_sql></sqlb_project>
